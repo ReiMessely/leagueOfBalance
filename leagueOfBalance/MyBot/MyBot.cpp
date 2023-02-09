@@ -1,3 +1,5 @@
+#include "Program.h"
+
 #include <dpp/dpp.h>
 #include <dpp/webhook.h>
 
@@ -15,26 +17,23 @@
 #include <sstream>
 #include <chrono>
 
-// returns true when program arguments are valid
-bool ValidateProgramArguments();
-
 void DppWebhookTest();
 void WarderBotTest();
 
 int main()
 {
-    if (!ValidateProgramArguments())
+    const ProgramArguments progArgs = Program::GetArguments();
+    if (!progArgs.valid)
     {
         return 1;
     }
 
     auto startTime = std::chrono::steady_clock::now();
 
-    auto teamNames = CsvParser::SplitIntoRows("Skinlines.csv");
-    //auto teamNames = CsvParser::SplitIntoRows("SubFactions.csv");
+    auto teamNames = CsvParser::SplitIntoRows(progArgs.teamNamesPath);
 
 #pragma region FileToRawFormsAnswer
-    auto rows = CsvParser::SplitIntoRows("formsAnswers.csv");
+    auto rows = CsvParser::SplitIntoRows(progArgs.formsAnswersPath);
     std::vector<RawFormsAnswer> answers;
     for (auto& row : rows)
     {
@@ -68,7 +67,7 @@ int main()
     std::vector<Team> teams;
     try
     {
-        teams = Team::SplitIntoTeams(players);
+        teams = Team::SplitIntoTeams(players,progArgs.amountOfPlayersPerTeam);
     }
     catch (const unequal_player_divide& e)
     {
@@ -76,9 +75,9 @@ int main()
     }
 
     // Print each teams avarage mmr
-    std::for_each(teams.begin(), teams.end(), [](const Team& t) {std::cout << *t.AvarageMMR() << '\n';});
+    //std::for_each(teams.begin(), teams.end(), [](const Team& t) {std::cout << *t.AvarageMMR() << '\n';});
 
-    // Format discord webhook messge
+    // Format discord webhook message
     std::stringstream message{"This is a test message!\n\n"};
     for (auto& team : teams)
     {
@@ -88,19 +87,13 @@ int main()
 
     auto endTime = std::chrono::steady_clock::now();
     std::chrono::duration<double> program_elapsed_seconds = endTime - startTime;
-    std::cout << "Program took: " << program_elapsed_seconds.count() << "s\n";
+    std::cout << "Program execution was done in " << program_elapsed_seconds.count() << "s\n";
 
     std::cout << "\n";
     std::cout << "Webhook message preview:\n";
     std::cout << message.str() << "\n";
     std::cout << "Send to webhook? (Y/N)\n";
-    char answer{ ' ' };
-    while (!(answer == 'Y' || answer == 'y' || answer == 'N' || answer == 'n'))
-    {
-        std::cin >> answer;
-    }
-
-    if (answer == 'N' || answer == 'n')
+    if (!Program::GetYesOrNo())
     {
         return 0;
     }
@@ -113,40 +106,9 @@ int main()
 
     auto endTimeWebhook = std::chrono::steady_clock::now();
     std::chrono::duration<double> webhook_elapsed_seconds = endTimeWebhook - startTimeWebhook;
-    std::cout << "Webhook took: " << webhook_elapsed_seconds.count() << "s\n";
+    std::cout << "Webhook execution was done in " << webhook_elapsed_seconds.count() << "s\n";
 
     return 0;
-}
-
-bool ValidateProgramArguments()
-{
-    using namespace std;
-
-    string formAnswersPath;
-    string amountOfPlayersPerTeamAnswer;
-    int amountOfPlayerPerTeam;
-    cout << "------ BALANCING SOFTWARE ------\n\n";
-    cout << "- Form answers path:\n";
-    cin >> formAnswersPath;
-    ifstream f(formAnswersPath.c_str());
-    if (f.bad())
-    {
-        cout << "File does not exist! Make sure the extension of the file is correct\n";
-        return false;
-    }
-    cout << "- Amount of players per team:\n";
-    cin >> amountOfPlayersPerTeamAnswer;
-    try
-    {
-        amountOfPlayerPerTeam = std::stoi(amountOfPlayersPerTeamAnswer);
-    }
-    catch (const std::exception& e)
-    {
-        std::cout << e.what() << '\n';
-        return false;
-    }
-    cout << "------ ------ ------\n";
-    return true;
 }
 
 void DppWebhookTest()

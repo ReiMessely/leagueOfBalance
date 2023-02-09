@@ -181,6 +181,7 @@
   <ItemGroup>
     <ClCompile Include="CsvParser.cpp" />
     <ClCompile Include="MyBot.cpp" />
+    <ClCompile Include="Program.cpp" />
     <ClCompile Include="WebhookSimplifier.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -227,6 +228,7 @@
     <ClInclude Include="dependencies\include\dpp-10.0\dpp\win32_safe_warnings.h" />
     <ClInclude Include="dependencies\include\dpp-10.0\dpp\wsclient.h" />
     <ClInclude Include="Player.h" />
+    <ClInclude Include="Program.h" />
     <ClInclude Include="Rank.h" />
     <ClInclude Include="RawFormsAnswer.h" />
     <ClInclude Include="Team.h" />
