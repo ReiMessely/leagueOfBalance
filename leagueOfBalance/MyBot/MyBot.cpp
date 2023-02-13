@@ -72,6 +72,7 @@ int main()
     catch (const unequal_player_divide& e)
     {
         std::cout << e.what() << '\n';
+        return 1;
     }
 
     // Print each teams avarage mmr
