@@ -90,18 +90,26 @@ int main()
     std::cout << "Program execution was done in " << program_elapsed_seconds.count() << "s\n";
 
     std::cout << "\n";
-    std::cout << "Webhook message preview:\n";
-    std::cout << message.str() << "\n";
+    std::cout << "See webhook message preview? (Y/N)\n";
+    if (Program::GetYesOrNo())
+    {
+        std::cout << message.str() << "\n";
+    }
     std::cout << "Send to webhook? (Y/N)\n";
     if (!Program::GetYesOrNo())
     {
         return 0;
     }
+    std::cout << "Send to DEV webhook (Y) or PUBLIC webhook (N)?\n";
+    bool devPubAnswer = Program::GetYesOrNo();
+
+    std::string webhook_url = (devPubAnswer ? DEV_WEBHOOK_URL : MASTER_WEBHOOK_URL);
+    uint64_t messageId = (devPubAnswer ? DEV_MESSAGE_ID : MASTER_MESSAGE_ID);
 
     auto startTimeWebhook = std::chrono::steady_clock::now();
     // Discord webhook
-    WBS_MASTER->ChangeURL(MASTER_WEBHOOK_URL);
-    WBS_MASTER->ChangeMessageToEdit(MASTER_MESSAGE_ID);
+    WBS_MASTER->ChangeURL(webhook_url);
+    WBS_MASTER->ChangeMessageToEdit(messageId);
     WBS_MASTER->UpdateMessage(message.str());
 
     auto endTimeWebhook = std::chrono::steady_clock::now();
